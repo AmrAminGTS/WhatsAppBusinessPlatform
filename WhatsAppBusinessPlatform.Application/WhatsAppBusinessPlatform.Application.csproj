@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+	<PackageReference Include="Microsoft.AspNetCore.Localization" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Riok.Mapperly" />
+	<PackageReference Include="Scrutor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatAmR\MediatAmR.csproj" />
+    <ProjectReference Include="..\WhatsAppBusinessPlatform.Domain\WhatsAppBusinessPlatform.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Messaging\Validators\" />
+    <Folder Include="Features\Contacts\Handlers\Events\" />
+    <Folder Include="Features\Contacts\Requests\Events\" />
+    <Folder Include="Features\Chats\Handlers\Events\" />
+    <Folder Include="Features\Chats\Requests\Events\" />
+    <Folder Include="Features\Entity\Handlers\Events\" />
+    <Folder Include="Features\Entity\Requests\Events\" />
+    <Folder Include="Features\Messaging\Handlers\Queries\" />
+    <Folder Include="Features\Messaging\Requests\Queries\" />
+    <Folder Include="Features\Entity\Handlers\Commands\" />
+    <Folder Include="Features\Entity\Handlers\Queries\" />
+    <Folder Include="Features\Entity\Requests\Commands\" />
+    <Folder Include="Features\Entity\Requests\Queries\" />
+  </ItemGroup>
+
+</Project>

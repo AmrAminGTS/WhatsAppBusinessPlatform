@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.Props" />
+    <File Path="Directory.Packages.Props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="MediatAmR/MediatAmR.csproj" Id="cb7151ab-7a1e-4c2a-990f-be60f759df5b" />
+    <Project Path="WhatsAppBusinessPlatform.API.Web/WhatsAppBusinessPlatform.API.Web.csproj" />
+    <Project Path="WhatsAppBusinessPlatform.Application/WhatsAppBusinessPlatform.Application.csproj" />
+    <Project Path="WhatsAppBusinessPlatform.Domain/WhatsAppBusinessPlatform.Domain.csproj" />
+    <Project Path="WhatsAppBusinessPlatform.Infrastucture/WhatsAppBusinessPlatform.Infrastucture.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\WhatsAppBusinessPlatform.Application\WhatsAppBusinessPlatform.Application.csproj" />
+    <ProjectReference Include="..\WhatsAppBusinessPlatform.Domain\WhatsAppBusinessPlatform.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+	<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Polly" />
+  </ItemGroup>
+
+</Project>
