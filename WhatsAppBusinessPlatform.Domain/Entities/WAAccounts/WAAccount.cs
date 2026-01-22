@@ -15,4 +15,5 @@ public class WAAccount : BaseDomainEntity<string>
     // Navigation Properties
     public Contact? Contact { get; set; }
     public ICollection<WAMessage> Messages { get; set; } = [];
+    public ICollection<MessageReaction> MessageReactions { get; set; } = [];
 }

@@ -8,5 +8,5 @@ namespace WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 
 public interface IMessageReactionRepository
 {
-    Task<Result> SaveReactionAsync(string reactedToMessageId, string? emoji, WAAccount sentByAccount, DateTimeOffset reactionTime, MessageDirection direction, CancellationToken cancellationToken);
+    Task<Result<WAMessage>> SaveReactionAsync(string reactedToMessageId, string? emoji, WAAccount sentByAccount, DateTimeOffset reactionTime, MessageDirection direction, CancellationToken cancellationToken);
 }

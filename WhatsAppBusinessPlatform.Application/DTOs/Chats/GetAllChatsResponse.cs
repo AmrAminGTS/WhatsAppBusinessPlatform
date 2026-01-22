@@ -20,7 +20,7 @@ public sealed class ChatListItemDto
     public string? FullName { get; set; } 
     public required string PhoneNumber { get; set; } 
     public ContactType ContactType { get; set; } 
-    public ChatLastMessageResponse? LastMessage { get; set; }
+    public ChatLastUpdateDto? LastUpdate { get; set; }
     public required int UnreadCount { get; set; }
 }
 
@@ -33,6 +33,14 @@ public sealed class ChatLastMessageResponse
     public required DateTimeOffset DateTime { get; init; }
     public required MessageStatusType? LastStatus { get; init; }
 }
+public class ChatLastUpdateDto
+{
+    public bool IsReaction { get; init; }
+    public ChatLastMessageResponse? Message { get; init; } 
+    public MessageReactionResponse? Reaction { get; init; }
+    public DateTimeOffset When { get; init; } 
+}
+
 public enum AccountType
 {
     Normal,

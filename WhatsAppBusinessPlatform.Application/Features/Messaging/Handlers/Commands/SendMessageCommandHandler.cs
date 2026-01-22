@@ -64,13 +64,18 @@ public sealed class SendMessageCommandHandler<TMessageContent>
                 var reactionContent = request.SendWAMessageRequest.MessageContent as ReactionMessageContent;
                 ArgumentNullException.ThrowIfNull(reactionContent);
 
-                await _unitOfWork.ReactionRepository.SaveReactionAsync(
+                Result saveReactionResult = await _unitOfWork.ReactionRepository.SaveReactionAsync(
                     reactionContent!.MessageId,
                     reactionContent.Emoji,
                     sendToAccount,
                     _dateTimeProvider.UtcNow,
                     MessageDirection.Sent,
                     cancellationToken);
+
+                if (saveReactionResult.IsFailure)
+                {
+                    return saveReactionResult.Error;
+                }
             }
             else
             {

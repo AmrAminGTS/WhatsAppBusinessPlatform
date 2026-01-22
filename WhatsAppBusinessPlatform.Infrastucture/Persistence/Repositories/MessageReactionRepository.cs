@@ -11,7 +11,7 @@ public class MessageReactionRepository(ApplicationDbContext context) : Repositor
 {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<Result> SaveReactionAsync(
+    public async Task<Result<WAMessage>> SaveReactionAsync(
         string reactedToMessageId, 
         string? emoji,
         WAAccount sentByAccount,
@@ -29,24 +29,32 @@ public class MessageReactionRepository(ApplicationDbContext context) : Repositor
 
         DbSet<MessageReaction> reactionSet = _context.Set<MessageReaction>();
 
-        MessageReaction? existingReaction = await reactionSet.FirstOrDefaultAsync(r
-            => r.ReactedToMessageId == reactedToMessageId
-            && r.Direction == direction
-            && r.ReactedByAccountId == sentByAccount.Id,
-            cancellationToken);
+        MessageReaction? existingReaction = direction == MessageDirection.Received
+            ? await reactionSet.FirstOrDefaultAsync(r
+                => r.ReactedToMessageId == reactedToMessageId
+                && r.Direction == direction
+                && r.ReactedByAccountId == sentByAccount.Id,
+                cancellationToken)
+            : await reactionSet.FirstOrDefaultAsync(r
+                => r.ReactedToMessageId == reactedToMessageId
+                && r.Direction == direction,
+                cancellationToken);
 
         bool emojiFound = string.IsNullOrWhiteSpace(emoji) == false;
 
+        // if reaction exists and emoji is missing, remove reaction
         if (existingReaction is not null && emojiFound == false)
         {
             // remove reaction if emoji is missing
             reactionSet.Remove(existingReaction);
         }
+        // if reaction exists and emoji is present, update reaction
         else if (existingReaction is not null && emojiFound)
         {
             existingReaction.Emoji = emoji!;
             reactionSet.Update(existingReaction);
         }
+        // if reaction does not exist and emoji is present, create reaction
         else if (existingReaction is null && emojiFound)
         {
             MessageReaction reaction = new()
@@ -61,6 +69,8 @@ public class MessageReactionRepository(ApplicationDbContext context) : Repositor
             };
             reactionSet.Add(reaction);
         }
-        return Result.Success();
+        // if reaction does not exist and emoji is missing, do nothing.
+        // this case only occurs when trying to remove a non-existing reaction.
+        return Result.Success(reactedToMessage);
     }
 }

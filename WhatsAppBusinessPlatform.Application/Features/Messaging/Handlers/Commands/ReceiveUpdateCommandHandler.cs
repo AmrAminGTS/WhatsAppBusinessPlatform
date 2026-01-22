@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO.Pipelines;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Azure.Core;
@@ -139,22 +140,29 @@ internal sealed class ReceiveUpdateCommandHandler : ICommandHandler<ReceiveUpdat
             ReactionMessageContent? reactionContent = JsonSerializer.Deserialize<ReactionMessageContent>(receivedMessage.JsonContent);
             ArgumentNullException.ThrowIfNull(reactionContent);
 
-            await _unitOfWork.ReactionRepository.SaveReactionAsync(
+            Result<WAMessage> saveReactionResult = await _unitOfWork.ReactionRepository.SaveReactionAsync(
                 reactionContent!.MessageId,
                 reactionContent.Emoji, 
                 sentByAccount,
                 DateTimeOffset.FromTimestampString(receivedMessage.Timestamp),
                 MessageDirection.Received,
                 cancellationToken);
+
+            if (saveReactionResult.IsFailure)
+            {
+                return saveReactionResult.Error;
+            }
+            WAMessage reactedToMessage = saveReactionResult.Value;
+            reactedToMessage.Raise(new MessageReactionsChangedDomainEvent(reactedToMessage));
+            _logger.LogInformation("Received Update is Reaction Message");
         }
         else
         {
             WAMessage messageEntry = receivedMessage.MapToWAMessage(sentByAccount, phoneNumberId, rawMessageBytes);
             messageRepository.Add(messageEntry);
             messageEntry.Raise(new MessageReceivedDomainEvent(messageEntry));
+            _logger.LogInformation("Received Update is Message");
         }
-
-        _logger.LogInformation("Received Update is Message\n{Message}", JsonSerializer.Serialize(receivedMessage));
         return await _unitOfWork.SaveAsync(cancellationToken);
     }
 

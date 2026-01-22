@@ -33,4 +33,13 @@ public class MessageReaction
             ? value 
             : throw new ArgumentException("Only received reaction should have Account");
     }
+
+#pragma warning disable S3358 // Ternary operators should not be nested
+    public string? ContactFullName => Direction == MessageDirection.Received
+                            ? (ReactedByAccount!.Contact != null
+                                    ? ReactedByAccount.Contact.FullName
+                                    : ReactedByAccount.PhoneNumber)
+                            : null;
+#pragma warning restore S3358 // Ternary operators should not be nested
+
 }

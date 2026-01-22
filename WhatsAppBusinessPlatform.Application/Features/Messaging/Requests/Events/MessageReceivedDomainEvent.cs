@@ -8,3 +8,4 @@ using WhatsAppBusinessPlatform.Domain.Entities.Messages;
 namespace WhatsAppBusinessPlatform.Application.Features.Messaging.Requests.Events;
 
 public sealed record MessageReceivedDomainEvent(WAMessage Message) : IEvent;
+public sealed record MessageReactionsChangedDomainEvent(WAMessage ReactedToMessage) : IEvent;

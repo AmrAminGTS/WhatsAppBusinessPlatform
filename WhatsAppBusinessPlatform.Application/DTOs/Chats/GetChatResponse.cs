@@ -28,7 +28,8 @@ public class ChatMessageResponse : BaseChatMessageResponse
     public required DateTimeOffset DateTime { get; init; }
     public MessageStatusType? LastStatus { get; init; }
     public ReplyToMessageResponse? ReplyTo{ get; init; }
-    public IEnumerable<MessageReactionResponse> Reactions { get; init; } = [];
+    public IDictionary<string, int> Reactions { get; init; } = new Dictionary<string, int>();
+    public string? SentReaction { get; set; } 
 }
 public sealed class RealTimeChatMessageResponse : ChatMessageResponse
 {
@@ -48,4 +49,9 @@ public sealed class RealTimeChatMessageResponse : ChatMessageResponse
 }
 
 public sealed class ReplyToMessageResponse : BaseChatMessageResponse;
-public sealed record MessageReactionResponse(string Emoji, MessageDirection Direction, string? UserId);
+public sealed record MessageReactionResponse(
+    string Emoji,
+    MessageDirection Direction,
+    string? UserId,
+    string? ContactFullName,
+    object ReactedToMessage);

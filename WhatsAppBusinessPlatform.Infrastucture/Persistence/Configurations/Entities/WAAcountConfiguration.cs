@@ -29,6 +29,11 @@ internal sealed class WAAcountConfiguration : IEntityTypeConfiguration<WAAccount
             .HasForeignKey<Contact>(f =>f.WAAcountId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(p => p.MessageReactions)
+            .WithOne(f => f.ReactedByAccount)
+            .HasForeignKey(m => m.ReactedByAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(p => p.PhoneNumber).HasMaxLength(DomainConstraints.ShortString.Max);
     }
 }

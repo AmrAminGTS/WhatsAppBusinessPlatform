@@ -20,7 +20,8 @@ internal sealed class GetAllChatsQueryHandler(
     {
         string userId = userContext.UserId;
         IListWithPaginationInfo<ChatListItemDto> result = await unitOfWork.Repository<WAAccount>()
-            .Select(c => c)
+            .Include(a => a.Messages).ThenInclude(m => m.Reactions).ThenInclude(mr => mr.ReactedByAccount)
+            .Include(a => a.Messages).ThenInclude(m => m.Reactions).ThenInclude(mr => mr.ReactedToMessage)
             .OrderByDescending(c => c.Messages
                 .OrderByDescending(m => m.DateTimeOffset)
                 .Select(m => m.DateTimeOffset)
