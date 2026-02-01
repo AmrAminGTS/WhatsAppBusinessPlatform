@@ -32,10 +32,10 @@ internal sealed class WAMessageConfiguration : IEntityTypeConfiguration<WAMessag
             .HasForeignKey(f => f.MessageId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(e => e.Id).HasMaxLength(DomainConstraints.MediumString.Max);
+        builder.Property(e => e.Id).HasMaxLength(DomainConstraints.MessageIdMaxLength);
         builder.Property(e => e.BusinessPhoneId).HasMaxLength(DomainConstraints.ShortString.Max);
         builder.Property(e => e.ContactPhoneNumber).HasMaxLength(DomainConstraints.ShortString.Max);
-        builder.Property(e => e.ReplyToId).HasMaxLength(DomainConstraints.MediumString.Max);
+        builder.Property(e => e.ReplyToId).HasMaxLength(DomainConstraints.MessageIdMaxLength);
         builder.Property(e => e.CreatedByUserId).HasMaxLength(DomainConstraints.MediumString.Max);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using WhatsAppBusinessPlatform.Domain.Common;
 
 namespace WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 public interface IRepository<T> where T : class

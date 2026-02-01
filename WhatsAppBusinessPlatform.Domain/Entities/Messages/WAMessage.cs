@@ -32,6 +32,11 @@ public class WAMessage : BaseDomainEntity<string>
     public ICollection<MessageReaction> Reactions { get; init; } = [];
     public ICollection<MessageStatus> Statuses { get; init; } = [];
     public ICollection<MessageReader> MessageReaders { get; init; } = [];
+
+    // Helpers
+    public Dictionary<string, int> GetReactionsSummary
+        => Reactions.GroupBy(mr => mr.Emoji).ToDictionary(g => g.Key, g => g.Count());
+
 }
 public enum ContactType
 {

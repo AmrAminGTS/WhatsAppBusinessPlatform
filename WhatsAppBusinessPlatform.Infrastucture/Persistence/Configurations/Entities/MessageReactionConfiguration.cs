@@ -13,9 +13,14 @@ internal sealed class MessageReactionConfiguration : IEntityTypeConfiguration<Me
     public void Configure(EntityTypeBuilder<MessageReaction> builder)
     {
         builder.HasKey(mr => mr.Id);
+        builder.HasOne(mr => mr.Message)
+            .WithOne()
+            .HasForeignKey<MessageReaction>(mr => mr.MessageId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(mr => mr.Id).HasMaxLength(DomainConstraints.MessageIdMaxLength);
+        builder.Property(mr => mr.ReactedToMessageId).HasMaxLength(DomainConstraints.MessageIdMaxLength);
         builder.Property(mr => mr.Emoji).HasMaxLength(DomainConstraints.ShortString.Max);
-        builder.Property(mr => mr.ReactedToMessageId).HasMaxLength(DomainConstraints.MediumString.Max);
         builder.Property(mr => mr.UserId).HasMaxLength(DomainConstraints.MediumString.Max);
     }
 }

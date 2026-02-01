@@ -20,7 +20,7 @@ public sealed class ChatListItemDto
     public string? FullName { get; set; } 
     public required string PhoneNumber { get; set; } 
     public ContactType ContactType { get; set; } 
-    public ChatLastUpdateDto? LastUpdate { get; set; }
+    public ChatLastUpdateResponse? LastUpdate { get; set; }
     public required int UnreadCount { get; set; }
 }
 
@@ -28,17 +28,16 @@ public sealed class ChatLastMessageResponse
 {
     public required string Id { get; set; }
     public required MessageContentType ContentType { get; init; }
-    public required JsonElement JsonContent { get; init; }
-    public required MessageDirection Direction { get; init; }
-    public required DateTimeOffset DateTime { get; init; }
+    public required object JsonContent { get; init; }
     public required MessageStatusType? LastStatus { get; init; }
 }
-public class ChatLastUpdateDto
+public class ChatLastUpdateResponse
 {
-    public bool IsReaction { get; init; }
-    public ChatLastMessageResponse? Message { get; init; } 
-    public MessageReactionResponse? Reaction { get; init; }
-    public DateTimeOffset When { get; init; } 
+    public required bool IsReaction { get; init; }
+    public required ChatLastMessageResponse? Message { get; init; } 
+    public required MessageReactionResponse? Reaction { get; init; }
+    public required DateTimeOffset When { get; init; } 
+    public required MessageDirection Direction { get; init; }
 }
 
 public enum AccountType

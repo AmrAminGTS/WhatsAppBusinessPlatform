@@ -1,45 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using WhatsAppBusinessPlatform.Domain.Common;
+using WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses;
 using WhatsAppBusinessPlatform.Domain.Entities.WAAccounts;
 
 namespace WhatsAppBusinessPlatform.Domain.Entities.Messages;
 
-public class MessageReaction
+public class MessageReaction : BaseDomainEntity<Guid>
 {
-    public long Id { get; set; }
-    public string? UserId
-    {
-        get; set => field = Direction == MessageDirection.Sent 
-            ? value 
-            : throw new ArgumentException("Only sent reaction should have UserId");
-    }
+    public override Guid Id { get; set; } = Guid.NewGuid();
     public required string Emoji { get; set; }
     public required DateTimeOffset DateTimeOffset { get; set; }
     public required MessageDirection Direction { get; set; }
+    public required string MessageId { get; set; }
     public required string ReactedToMessageId { get; set; }
+    public string? UserId
+    {
+        get; set => field = (Direction == MessageDirection.Sent && value != null 
+            || Direction == MessageDirection.Received && value == null)
+            ? value 
+            : throw new ArgumentException($"Sent reaction should have {nameof(UserId)}");
+    }
 
     // Navigation Properties
     public required WAMessage ReactedToMessage { get; set; }
-    public string? ReactedByAccountId
+    public required WAMessage Message { get; set; }
+    public ICollection<MessageStatus> Statuses { get; set; } = [];
+    public string? ContactAccountId
     {
-        get; set => field = Direction == MessageDirection.Received 
+        get; set => field = (Direction == MessageDirection.Received && value != null
+            || Direction == MessageDirection.Sent && value == null)
             ? value 
-            : throw new ArgumentException("Only received reaction should have Account");
+            : throw new ArgumentException($"Received reaction should have {nameof(ContactAccountId)}");
     }
-    public WAAccount? ReactedByAccount
+    public WAAccount? ContactAccount
     {
-        get; set => field = Direction == MessageDirection.Received 
+        get; set => field = (Direction == MessageDirection.Received && value != null
+            || Direction == MessageDirection.Sent && value == null)
             ? value 
-            : throw new ArgumentException("Only received reaction should have Account");
+            : throw new ArgumentException($"Received reaction should have {nameof(ContactAccount)}");
     }
-
-#pragma warning disable S3358 // Ternary operators should not be nested
-    public string? ContactFullName => Direction == MessageDirection.Received
-                            ? (ReactedByAccount!.Contact != null
-                                    ? ReactedByAccount.Contact.FullName
-                                    : ReactedByAccount.PhoneNumber)
-                            : null;
-#pragma warning restore S3358 // Ternary operators should not be nested
-
 }

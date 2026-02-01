@@ -45,4 +45,5 @@ public class UnitOfWork : IUnitOfWork
 
     // Custom Repositories
     public IMessageReactionRepository ReactionRepository => field ??= new MessageReactionRepository(_context);
+    public IWAAccountRepository AccountRepository => field ??= new WAAccountRepository(_context);
 }

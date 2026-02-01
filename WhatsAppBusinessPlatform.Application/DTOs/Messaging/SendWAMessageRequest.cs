@@ -10,8 +10,7 @@ public class SendWAMessageRequest<TMessageContent> where TMessageContent : IMess
     public string? ReplyToMessageId { get; set; } 
     public required TMessageContent MessageContent { get; set; }
 }
-public sealed class ReactToMessageRequest<TMessageContent> : SendWAMessageRequest<TMessageContent>
-    where TMessageContent : IMessageContentType
+public sealed class ReactToMessageRequest : SendWAMessageRequest<ReactionMessageContent>
 {
     [JsonIgnore]
     public new string? ReplyToMessageId { get; set; } = null;

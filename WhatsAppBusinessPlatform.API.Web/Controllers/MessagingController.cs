@@ -1,6 +1,7 @@
 ﻿using MediatAmR.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using WhatsAppBusinessPlatform.Application.Common;
+using WhatsAppBusinessPlatform.Application.DTOs.Chats;
 using WhatsAppBusinessPlatform.Application.DTOs.Messaging;
 using WhatsAppBusinessPlatform.Application.DTOs.Messaging.MessageContentTypes;
 using WhatsAppBusinessPlatform.Application.Features.Messaging.Requests.Commands;
@@ -15,10 +16,17 @@ public sealed class MessagingController(IRequestSender sender) : BaseController
         return result.IsSuccess ? Ok(result.Value) : ToProblemDetails(result.Error);
     }
 
-    [HttpPost("ReactToMessage")]
-    public async Task<ActionResult> ReactToMessageAsync(ReactToMessageRequest<ReactionMessageContent> request, [FromHeader] string idempotencyKey)
+    [HttpPut("ReactToMessage")]
+    public async Task<ActionResult> ReactToMessageAsync(ReactToMessageRequest request)
     {
-        Result<string> result = await sender.Send(new SendMessageCommand<ReactionMessageContent>(request, idempotencyKey));
+        Result<string> result = await sender.Send(new ReactToMessageCommand(request));
+        return result.IsSuccess ? Ok(result.Value) : ToProblemDetails(result.Error);
+    }
+
+    [HttpDelete("RemoveMessageReaction")]
+    public async Task<ActionResult<ChatLastUpdateResponse>> RemoveMessageReactionAsync(string id)
+    {
+        Result<ChatLastUpdateResponse?> result = await sender.Send(new RemoveMessageReactionCommand(id));
         return result.IsSuccess ? Ok(result.Value) : ToProblemDetails(result.Error);
     }
 

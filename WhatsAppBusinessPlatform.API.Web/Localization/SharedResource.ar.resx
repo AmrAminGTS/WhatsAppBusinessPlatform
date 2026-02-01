@@ -124,7 +124,7 @@
     <value>لم يتم يتم العثور على جهة اتصال رقم: {0}</value>
   </data>
   <data name="General.NotFound" xml:space="preserve">
-    <value>لم يتم يتم العثور على {0} رقم: {1}</value>
+    <value>لم يتم يتم العثور على {0} </value>
   </data>
   <data name="Messaging.MessageNotFound" xml:space="preserve">
     <value>لم يتم يتم العثور على رسالة رقم: {0}</value>
@@ -140,5 +140,8 @@
   </data>
   <data name="Messaging.UnsuccessfulStatusCode" xml:space="preserve">
     <value>خطا اثناء الارسال: {0}</value>
+  </data>
+  <data name="General.NotFoundWithId" xml:space="preserve">
+    <value>لم يتم يتم العثور على {0} رقم: {1}</value>
   </data>
 </root>

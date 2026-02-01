@@ -53,7 +53,7 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                     b.HasIndex("WAAcountId")
                         .IsUnique();
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses.MessageStatus", b =>
@@ -72,7 +72,10 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
 
                     b.Property<string>("MessageId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(199)");
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("MessageReactionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PricingCategory")
                         .HasColumnType("nvarchar(max)");
@@ -94,7 +97,9 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessageStatuses");
+                    b.HasIndex("MessageReactionId");
+
+                    b.ToTable("MessageStatuses", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses.StatusError", b =>
@@ -133,16 +138,18 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .IsUnique()
                         .HasFilter("[StatusId] IS NOT NULL");
 
-                    b.ToTable("StatusError");
+                    b.ToTable("StatusError", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReaction", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasMaxLength(200)
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("ContactAccountId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTimeOffset>("DateTimeOffset")
                         .HasColumnType("datetimeoffset");
@@ -155,13 +162,17 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .HasMaxLength(49)
                         .HasColumnType("nvarchar(49)");
 
-                    b.Property<string>("ReactedByAccountId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MessageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ReactedToMessageId")
                         .IsRequired()
-                        .HasMaxLength(199)
-                        .HasColumnType("nvarchar(199)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("UserId")
                         .HasMaxLength(199)
@@ -169,11 +180,14 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReactedByAccountId");
+                    b.HasIndex("ContactAccountId");
+
+                    b.HasIndex("MessageId")
+                        .IsUnique();
 
                     b.HasIndex("ReactedToMessageId");
 
-                    b.ToTable("MessageReaction");
+                    b.ToTable("MessageReaction", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReader", b =>
@@ -182,20 +196,20 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("MessageId")
-                        .HasColumnType("nvarchar(199)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("UserId", "MessageId");
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessageReader");
+                    b.ToTable("MessageReader", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.WAMessage", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(199)
-                        .HasColumnType("nvarchar(199)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("BusinessPhoneId")
                         .IsRequired()
@@ -234,8 +248,8 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ReplyToId")
-                        .HasMaxLength(199)
-                        .HasColumnType("nvarchar(199)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -243,7 +257,7 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
 
                     b.HasIndex("ReplyToId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.WAAccounts.WAAccount", b =>
@@ -264,7 +278,7 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", (string)null);
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Contacts.Contact", b =>
@@ -286,6 +300,10 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReaction", null)
+                        .WithMany("Statuses")
+                        .HasForeignKey("MessageReactionId");
+
                     b.Navigation("Message");
                 });
 
@@ -301,10 +319,16 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReaction", b =>
                 {
-                    b.HasOne("WhatsAppBusinessPlatform.Domain.Entities.WAAccounts.WAAccount", "ReactedByAccount")
+                    b.HasOne("WhatsAppBusinessPlatform.Domain.Entities.WAAccounts.WAAccount", "ContactAccount")
                         .WithMany("MessageReactions")
-                        .HasForeignKey("ReactedByAccountId")
+                        .HasForeignKey("ContactAccountId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("WhatsAppBusinessPlatform.Domain.Entities.Messages.WAMessage", "Message")
+                        .WithOne()
+                        .HasForeignKey("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReaction", "MessageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("WhatsAppBusinessPlatform.Domain.Entities.Messages.WAMessage", "ReactedToMessage")
                         .WithMany("Reactions")
@@ -312,7 +336,9 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ReactedByAccount");
+                    b.Navigation("ContactAccount");
+
+                    b.Navigation("Message");
 
                     b.Navigation("ReactedToMessage");
                 });
@@ -350,6 +376,11 @@ namespace WhatsAppBusinessPlatform.Infrastucture.Migrations
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses.MessageStatus", b =>
                 {
                     b.Navigation("Error");
+                });
+
+            modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.MessageReaction", b =>
+                {
+                    b.Navigation("Statuses");
                 });
 
             modelBuilder.Entity("WhatsAppBusinessPlatform.Domain.Entities.Messages.WAMessage", b =>

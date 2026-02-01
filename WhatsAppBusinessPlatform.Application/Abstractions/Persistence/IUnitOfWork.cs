@@ -5,6 +5,7 @@ namespace WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 public interface IUnitOfWork
 {
     IMessageReactionRepository ReactionRepository { get; }
+    IWAAccountRepository AccountRepository { get; }
 
     Task<Result<int>> SaveAsync(CancellationToken cancellationToken = default);
     IExecutionStrategy CreateExecutionStrategy();

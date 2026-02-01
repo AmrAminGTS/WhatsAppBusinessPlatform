@@ -10,7 +10,9 @@ internal static class WAMessageStatusMappingExtensions
 {
     extension(WebhookReceivedMessageStatus src)
     {
-        public MessageStatus MapToWAMessageStatus(WAMessage wAMessage) => new ()
+        public MessageStatus MapToWAMessageStatus(
+            WAMessage wAMessage,
+            byte[] rawBytes) => new ()
         {
             MessageId = src.MessageId,
             DateTimeOffset = DateTimeOffset.FromTimestampString(src.Timestamp),
@@ -20,6 +22,7 @@ internal static class WAMessageStatusMappingExtensions
             PricingCategory = src.Pricing?.Category,
             PricingType = src.Pricing?.Type,
             Message = wAMessage,
+            RawWebhookReqest = rawBytes,
             Error = src.Errors?.Select(e => new StatusError()
             {
                 Code = e.Code,

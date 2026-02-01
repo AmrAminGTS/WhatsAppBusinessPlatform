@@ -4,11 +4,9 @@ using System.Threading.Channels;
 using MediatAmR;
 using MediatAmR.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using WhatsAppBusinessPlatform.Application.Abstractions.Realtime;
 using WhatsAppBusinessPlatform.Application.Common;
 using WhatsAppBusinessPlatform.Application.DTOs.Chats;
 using WhatsAppBusinessPlatform.Application.DTOs.Messaging.MessageContentTypes;
-using WhatsAppBusinessPlatform.Application.Features.Contacts.Handlers.Commands;
 using WhatsAppBusinessPlatform.Application.Features.Messaging.Handlers.Commands;
 using WhatsAppBusinessPlatform.Application.Features.Messaging.Requests.Commands;
 
@@ -33,6 +31,10 @@ public static class DependencyInjection
             SendMessageCommandHandler<TextMessageContent>>();
         services.AddScoped<IRequestHandler<SendMessageCommand<ReactionMessageContent>, Result<string>>,
             SendMessageCommandHandler<ReactionMessageContent>>();
+        services.AddScoped<IRequestHandler<ReactToMessageCommand, Result<string>>,
+            ReactToMessageCommandHandler>();
+        services.AddScoped<IRequestHandler<RemoveMessageReactionCommand, Result<ChatLastUpdateResponse?>>,
+            RemoveMessageReactionCommandHandler>();
 
         return services;
     }

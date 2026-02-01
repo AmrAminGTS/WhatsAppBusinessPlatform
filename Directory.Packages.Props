@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!--Presentation-->
+    <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />

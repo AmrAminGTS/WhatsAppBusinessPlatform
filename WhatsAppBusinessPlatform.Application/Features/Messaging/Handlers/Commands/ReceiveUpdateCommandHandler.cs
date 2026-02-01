@@ -1,8 +1,8 @@
-﻿using System.IO.Pipelines;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Azure.Core;
+using LinqKit;
+using MediatAmR.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,12 +11,15 @@ using WhatsAppBusinessPlatform.Application.Abstractions.Messaging;
 using WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 using WhatsAppBusinessPlatform.Application.Abstractions.Shared;
 using WhatsAppBusinessPlatform.Application.Common;
+using WhatsAppBusinessPlatform.Application.DTOs.Chats;
 using WhatsAppBusinessPlatform.Application.DTOs.Messaging.MessageContentTypes;
 using WhatsAppBusinessPlatform.Application.DTOs.Webhook;
 using WhatsAppBusinessPlatform.Application.Features.Messaging.Requests.Commands;
 using WhatsAppBusinessPlatform.Application.Features.Messaging.Requests.Events;
 using WhatsAppBusinessPlatform.Application.Mapping;
+using WhatsAppBusinessPlatform.Application.Mapping.Maps.Chats;
 using WhatsAppBusinessPlatform.Application.Mapping.Maps.Webhook;
+using WhatsAppBusinessPlatform.Domain.Common;
 using WhatsAppBusinessPlatform.Domain.Entities.Messages;
 using WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses;
 using WhatsAppBusinessPlatform.Domain.Entities.MessageStatuses.Events;
@@ -134,31 +137,72 @@ internal sealed class ReceiveUpdateCommandHandler : ICommandHandler<ReceiveUpdat
                 cancellationToken);
 
         IRepository<WAMessage> messageRepository = _unitOfWork.Repository<WAMessage>();
+        WAMessage messageEntry = receivedMessage.MapToWAMessage(sentByAccount, phoneNumberId, rawMessageBytes);
 
         if (MessageContentType.FromString(receivedMessage.MessageType) == MessageContentType.Reaction)
         {
             ReactionMessageContent? reactionContent = JsonSerializer.Deserialize<ReactionMessageContent>(receivedMessage.JsonContent);
             ArgumentNullException.ThrowIfNull(reactionContent);
+            var when = DateTimeOffset.FromTimestampString(receivedMessage.Timestamp);
 
-            Result<WAMessage> saveReactionResult = await _unitOfWork.ReactionRepository.SaveReactionAsync(
-                reactionContent!.MessageId,
-                reactionContent.Emoji, 
-                sentByAccount,
-                DateTimeOffset.FromTimestampString(receivedMessage.Timestamp),
-                MessageDirection.Received,
-                cancellationToken);
-
-            if (saveReactionResult.IsFailure)
+            if (!string.IsNullOrWhiteSpace(reactionContent.Emoji))
             {
-                return saveReactionResult.Error;
+                Result<Guid> saveReactionResult = await _unitOfWork.ReactionRepository.AddOrUpdateReactionAsync(
+                    messageEntry,
+                    reactionContent.ReactedToMessageId,
+                    reactionContent.Emoji!,
+                    sentByAccount.Id,
+                    null,
+                    when,
+                    MessageDirection.Received,
+                    cancellationToken);
+
+                if (saveReactionResult.IsFailure)
+                {
+                    return saveReactionResult.Error;
+                }
             }
-            WAMessage reactedToMessage = saveReactionResult.Value;
-            reactedToMessage.Raise(new MessageReactionsChangedDomainEvent(reactedToMessage));
+            else
+            {
+                MessageReaction? existingReaction = await _unitOfWork.ReactionRepository
+                    .FirstOrDefaultAsync(r
+                        => r.Direction == MessageDirection.Received
+                        && r.ReactedToMessageId == reactionContent.ReactedToMessageId
+                        && r.ContactAccountId == sentByAccount.Id
+                        , cancellationToken);
+
+                if(existingReaction == null)
+                {
+                    return GeneralErrors.NotFound(nameof(MessageReaction));
+                }
+
+                // persist the emoji message with no emoji
+                messageRepository.Add(messageEntry);
+                _unitOfWork.ReactionRepository.Delete(existingReaction);
+            }
             _logger.LogInformation("Received Update is Reaction Message");
+            WAMessage? reactedToMessage = await _unitOfWork.Repository<WAMessage>()
+                .Include(m => m.Reactions)
+                .FirstOrDefaultAsync(m => m.Id == reactionContent.ReactedToMessageId, cancellationToken);
+
+            if (reactedToMessage == null)
+            {
+                return MessagingErrors.MessageNotFound(reactionContent.ReactedToMessageId);
+            }
+
+            messageEntry.Raise(
+                new MessageReactionsChangedDomainEvent(
+                    messageEntry.ContactPhoneNumber,
+                    reactedToMessage.Id,
+                    reactionContent.Emoji,
+                    when,
+                    JsonSerializer.Deserialize<object>(reactedToMessage.JsonContent)!,
+                    reactedToMessage.GetReactionsSummary
+                )
+            );
         }
         else
         {
-            WAMessage messageEntry = receivedMessage.MapToWAMessage(sentByAccount, phoneNumberId, rawMessageBytes);
             messageRepository.Add(messageEntry);
             messageEntry.Raise(new MessageReceivedDomainEvent(messageEntry));
             _logger.LogInformation("Received Update is Message");
@@ -177,12 +221,11 @@ internal sealed class ReceiveUpdateCommandHandler : ICommandHandler<ReceiveUpdat
 
         if (existingMessage == null)
         {
-            _logger.LogError("Received Status for non-existing Message with Id: {MessageId}", status.MessageId);
+            _logger.LogWarning("Received Status for non-existing Message with Id: {MessageId}", status.MessageId);
             return MessagingErrors.MessageNotFound(status.MessageId);
         }
 
-        MessageStatus statusEntry = status.MapToWAMessageStatus(existingMessage);
-        statusEntry.RawWebhookReqest = rawBytes;
+        MessageStatus statusEntry = status.MapToWAMessageStatus(existingMessage, rawBytes);
 
         _unitOfWork.Repository<MessageStatus>().Add(statusEntry);
         statusEntry.Raise(new MessageStatusReceivedDomainEvent(status.RecipientId, status.MessageId, statusEntry.Status, statusEntry.Error?.Details));

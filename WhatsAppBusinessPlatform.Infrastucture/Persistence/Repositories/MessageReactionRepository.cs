@@ -3,22 +3,33 @@ using Microsoft.EntityFrameworkCore;
 using WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 using WhatsAppBusinessPlatform.Application.Common;
 using WhatsAppBusinessPlatform.Domain.Entities.Messages;
-using WhatsAppBusinessPlatform.Domain.Entities.WAAccounts;
 
 namespace WhatsAppBusinessPlatform.Infrastucture.Persistence.Repositories;
 
-public class MessageReactionRepository(ApplicationDbContext context) : Repository<MessageReaction>(context), IMessageReactionRepository
+public class MessageReactionRepository(ApplicationDbContext context) 
+    : Repository<MessageReaction>(context), IMessageReactionRepository
 {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<Result<WAMessage>> SaveReactionAsync(
+    public async Task<Result<Guid>> AddOrUpdateReactionAsync(
+        WAMessage message,
         string reactedToMessageId, 
-        string? emoji,
-        WAAccount sentByAccount,
+        string emoji,
+        string? contactAccountId,
+        string? sentByUserId,
         DateTimeOffset reactionTime,
         MessageDirection direction,
         CancellationToken cancellationToken)
     {
+        DbSet<MessageReaction> reactionSet = _context.Set<MessageReaction>();
+
+        MessageReaction? existingReaction = await reactionSet
+            .FirstOrDefaultAsync(r 
+                => r.Direction == direction 
+                && r.ReactedToMessageId == reactedToMessageId
+                && r.ContactAccountId == contactAccountId 
+                && r.UserId == sentByUserId, cancellationToken);
+
         WAMessage? reactedToMessage = await _context.Set<WAMessage>()
             .FirstOrDefaultAsync(m => m.Id == reactedToMessageId, cancellationToken);
 
@@ -27,35 +38,20 @@ public class MessageReactionRepository(ApplicationDbContext context) : Repositor
             return MessagingErrors.MessageNotFound(reactedToMessageId);
         }
 
-        DbSet<MessageReaction> reactionSet = _context.Set<MessageReaction>();
-
-        MessageReaction? existingReaction = direction == MessageDirection.Received
-            ? await reactionSet.FirstOrDefaultAsync(r
-                => r.ReactedToMessageId == reactedToMessageId
-                && r.Direction == direction
-                && r.ReactedByAccountId == sentByAccount.Id,
-                cancellationToken)
-            : await reactionSet.FirstOrDefaultAsync(r
-                => r.ReactedToMessageId == reactedToMessageId
-                && r.Direction == direction,
-                cancellationToken);
-
-        bool emojiFound = string.IsNullOrWhiteSpace(emoji) == false;
-
-        // if reaction exists and emoji is missing, remove reaction
-        if (existingReaction is not null && emojiFound == false)
-        {
-            // remove reaction if emoji is missing
-            reactionSet.Remove(existingReaction);
-        }
-        // if reaction exists and emoji is present, update reaction
-        else if (existingReaction is not null && emojiFound)
+        // if reaction exists, update reaction
+        if (existingReaction != null)
         {
             existingReaction.Emoji = emoji!;
+            existingReaction.DateTimeOffset = reactionTime;
+            existingReaction.ContactAccountId = contactAccountId;
+            existingReaction.Message = message;
+            existingReaction.MessageId = message.Id;
+
             reactionSet.Update(existingReaction);
+            return existingReaction.Id;
         }
-        // if reaction does not exist and emoji is present, create reaction
-        else if (existingReaction is null && emojiFound)
+        // if reaction does not exist, create reaction
+        else 
         {
             MessageReaction reaction = new()
             {
@@ -63,14 +59,14 @@ public class MessageReactionRepository(ApplicationDbContext context) : Repositor
                 DateTimeOffset = reactionTime,
                 Direction = direction,
                 ReactedToMessage = reactedToMessage,
-                ReactedToMessageId = reactedToMessageId,
-                ReactedByAccountId = sentByAccount.Id,
-                ReactedByAccount = sentByAccount
+                ReactedToMessageId = reactedToMessage.Id,
+                MessageId = message.Id,
+                Message = message,
+                ContactAccountId = contactAccountId,
+                UserId = sentByUserId
             };
             reactionSet.Add(reaction);
+            return reaction.Id;
         }
-        // if reaction does not exist and emoji is missing, do nothing.
-        // this case only occurs when trying to remove a non-existing reaction.
-        return Result.Success(reactedToMessage);
     }
 }

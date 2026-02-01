@@ -124,7 +124,7 @@
     <value>Couldn't find Contact with id : {0}</value>
   </data>
   <data name="General.NotFound" xml:space="preserve">
-    <value>Couldn't find {0} with id : {1}</value>
+    <value>Couldn't find {0}</value>
   </data>
   <data name="Messaging.MessageNotFound" xml:space="preserve">
     <value>Couldn't find message with id : {0}</value>
@@ -140,5 +140,8 @@
   </data>
   <data name="Messaging.UnsuccessfulStatusCode" xml:space="preserve">
     <value>The Response contains an error: {0}</value>
+  </data>
+  <data name="General.NotFoundWithId" xml:space="preserve">
+    <value>Couldn't find {0} with id : {1}</value>
   </data>
 </root>

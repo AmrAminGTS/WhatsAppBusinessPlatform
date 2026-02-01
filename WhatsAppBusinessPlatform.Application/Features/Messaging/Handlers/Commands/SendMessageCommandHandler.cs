@@ -16,8 +16,7 @@ using WhatsAppBusinessPlatform.Domain.Entities.WAAccounts;
 
 namespace WhatsAppBusinessPlatform.Application.Features.Messaging.Handlers.Commands;
 
-public sealed class SendMessageCommandHandler<TMessageContent>
-    : ICommandHandler<SendMessageCommand<TMessageContent>, Result<string>>
+public sealed class SendMessageCommandHandler<TMessageContent> : ICommandHandler<SendMessageCommand<TMessageContent>, Result<string>>
     where TMessageContent : IMessageContentType
 {
     private readonly IWAHttpClient _waHttpClient;
@@ -59,30 +58,9 @@ public sealed class SendMessageCommandHandler<TMessageContent>
                 return sendResult.Error;
             }
 
-            if (request.SendWAMessageRequest.MessageContent.MessageContentType == MessageContentType.Reaction)
-            {
-                var reactionContent = request.SendWAMessageRequest.MessageContent as ReactionMessageContent;
-                ArgumentNullException.ThrowIfNull(reactionContent);
-
-                Result saveReactionResult = await _unitOfWork.ReactionRepository.SaveReactionAsync(
-                    reactionContent!.MessageId,
-                    reactionContent.Emoji,
-                    sendToAccount,
-                    _dateTimeProvider.UtcNow,
-                    MessageDirection.Sent,
-                    cancellationToken);
-
-                if (saveReactionResult.IsFailure)
-                {
-                    return saveReactionResult.Error;
-                }
-            }
-            else
-            {
-                WAMessage message = request.SendWAMessageRequest
-                    .MapToWAMessage(sendResult.Value, sendToAccount, _userContext.UserId, _dateTimeProvider.UtcNow);
-                _unitOfWork.Repository<WAMessage>().Add(message);
-            }
+            WAMessage message = request.SendWAMessageRequest
+                .MapToWAMessage(sendResult.Value, sendToAccount, _userContext.UserId, _dateTimeProvider.UtcNow);
+            _unitOfWork.Repository<WAMessage>().Add(message);
 
             Result saveResult = await _unitOfWork.SaveAsync(cancellationToken);
             if (saveResult.IsFailure)

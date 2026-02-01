@@ -12,5 +12,7 @@ public static class GeneralErrors
         => DomainError.Failure("General.FailureWhileSavingToDatabase");
 
     public static DomainError NotFound(string name, string id)
-        => DomainError.NotFound("General.NotFound", name, id);
+        => DomainError.NotFound("General.NotFoundWithId", name, id);
+    public static DomainError NotFound(string name)
+        => DomainError.NotFound("General.NotFound", name);
 }

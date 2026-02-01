@@ -25,7 +25,7 @@ internal sealed class MarkMessagesAsReadCommandHandler(
 
             WAMessage? lastReceivedMessage = await unitOfWork.Repository<WAMessage>()
                 .Where(m => m.Id == request.LastReceivedMessageId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (lastReceivedMessage is null)
             {
@@ -39,7 +39,7 @@ internal sealed class MarkMessagesAsReadCommandHandler(
                     && m.DateTimeOffset <= lastReceivedMessage.DateTimeOffset)
                 .AsNoTracking()
                 .Select(m => new MessageReader { MessageId = m.Id, UserId = userId })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             unitOfWork.Repository<MessageReader>().AddRange(entries);
             Result<int> saveResult = await unitOfWork.SaveAsync(cancellationToken);

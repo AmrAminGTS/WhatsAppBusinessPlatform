@@ -30,8 +30,8 @@ internal sealed class WAAcountConfiguration : IEntityTypeConfiguration<WAAccount
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(p => p.MessageReactions)
-            .WithOne(f => f.ReactedByAccount)
-            .HasForeignKey(m => m.ReactedByAccountId)
+            .WithOne(f => f.ContactAccount)
+            .HasForeignKey(m => m.ContactAccountId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(p => p.PhoneNumber).HasMaxLength(DomainConstraints.ShortString.Max);

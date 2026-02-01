@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using WhatsAppBusinessPlatform.Application.Common;
+using WhatsAppBusinessPlatform.Application.DTOs.Chats;
 using WhatsAppBusinessPlatform.Domain.Entities.Messages;
-using WhatsAppBusinessPlatform.Domain.Entities.WAAccounts;
 
 namespace WhatsAppBusinessPlatform.Application.Abstractions.Persistence;
 
-public interface IMessageReactionRepository
+public interface IMessageReactionRepository: IRepository<MessageReaction>
 {
-    Task<Result<WAMessage>> SaveReactionAsync(string reactedToMessageId, string? emoji, WAAccount sentByAccount, DateTimeOffset reactionTime, MessageDirection direction, CancellationToken cancellationToken);
+    Task<Result<Guid>> AddOrUpdateReactionAsync(WAMessage message, string reactedToMessageId, string emoji, string? contactAccountId, string? sentByUserId, DateTimeOffset reactionTime, MessageDirection direction, CancellationToken cancellationToken);
 }

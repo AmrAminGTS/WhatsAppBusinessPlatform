@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WhatsAppBusinessPlatform.Infrastucture.Migrations;
 
 /// <inheritdoc />
-public partial class CreateDB : Migration
+public partial class CreateDb : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,7 +52,7 @@ public partial class CreateDB : Migration
             name: "Messages",
             columns: table => new
             {
-                Id = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: false),
+                Id = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                 DateTimeOffset = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                 ContentType = table.Column<int>(type: "int", nullable: false),
                 JsonContent = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
@@ -60,7 +60,7 @@ public partial class CreateDB : Migration
                 BusinessPhoneId = table.Column<string>(type: "nvarchar(49)", maxLength: 49, nullable: false),
                 ContactPhoneNumber = table.Column<string>(type: "nvarchar(49)", maxLength: 49, nullable: false),
                 RecipientType = table.Column<int>(type: "int", nullable: false),
-                ReplyToId = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: true),
+                ReplyToId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                 RawWebhookReqest = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                 CreatedByUserId = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: true),
                 IsDeleted = table.Column<bool>(type: "bit", nullable: false)
@@ -86,22 +86,25 @@ public partial class CreateDB : Migration
             name: "MessageReaction",
             columns: table => new
             {
+                Id = table.Column<Guid>(type: "uniqueidentifier", maxLength: 200, nullable: false),
                 Emoji = table.Column<string>(type: "nvarchar(49)", maxLength: 49, nullable: false),
-                Direction = table.Column<int>(type: "int", nullable: false),
-                ReactedToMessageId = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: false),
-                UserId = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: true),
                 DateTimeOffset = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                ReactedByAccountId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                Direction = table.Column<int>(type: "int", nullable: false),
+                MessageId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                ReactedToMessageId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                UserId = table.Column<string>(type: "nvarchar(199)", maxLength: 199, nullable: true),
+                ContactAccountId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                IsDeleted = table.Column<bool>(type: "bit", nullable: false)
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_MessageReaction", x => new { x.ReactedToMessageId, x.Emoji, x.Direction });
+                table.PrimaryKey("PK_MessageReaction", x => x.Id);
                 table.ForeignKey(
-                    name: "FK_MessageReaction_Accounts_ReactedByAccountId",
-                    column: x => x.ReactedByAccountId,
+                    name: "FK_MessageReaction_Accounts_ContactAccountId",
+                    column: x => x.ContactAccountId,
                     principalTable: "Accounts",
                     principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
+                    onDelete: ReferentialAction.Restrict);
                 table.ForeignKey(
                     name: "FK_MessageReaction_Messages_ReactedToMessageId",
                     column: x => x.ReactedToMessageId,
@@ -115,7 +118,7 @@ public partial class CreateDB : Migration
             columns: table => new
             {
                 UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                MessageId = table.Column<string>(type: "nvarchar(199)", nullable: false)
+                MessageId = table.Column<string>(type: "nvarchar(200)", nullable: false)
             },
             constraints: table =>
             {
@@ -133,7 +136,6 @@ public partial class CreateDB : Migration
             columns: table => new
             {
                 Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                MessageId = table.Column<string>(type: "nvarchar(199)", nullable: false),
                 DateTimeOffset = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                 Status = table.Column<int>(type: "int", nullable: false),
                 IsBillable = table.Column<bool>(type: "bit", nullable: false),
@@ -141,11 +143,18 @@ public partial class CreateDB : Migration
                 PricingCategory = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 PricingType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 RawWebhookReqest = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                MessageId = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                MessageReactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                 IsDeleted = table.Column<bool>(type: "bit", nullable: false)
             },
             constraints: table =>
             {
                 table.PrimaryKey("PK_MessageStatuses", x => x.Id);
+                table.ForeignKey(
+                    name: "FK_MessageStatuses_MessageReaction_MessageReactionId",
+                    column: x => x.MessageReactionId,
+                    principalTable: "MessageReaction",
+                    principalColumn: "Id");
                 table.ForeignKey(
                     name: "FK_MessageStatuses_Messages_MessageId",
                     column: x => x.MessageId,
@@ -191,9 +200,14 @@ public partial class CreateDB : Migration
             unique: true);
 
         migrationBuilder.CreateIndex(
-            name: "IX_MessageReaction_ReactedByAccountId",
+            name: "IX_MessageReaction_ContactAccountId",
             table: "MessageReaction",
-            column: "ReactedByAccountId");
+            column: "ContactAccountId");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_MessageReaction_ReactedToMessageId",
+            table: "MessageReaction",
+            column: "ReactedToMessageId");
 
         migrationBuilder.CreateIndex(
             name: "IX_MessageReader_MessageId",
@@ -216,6 +230,11 @@ public partial class CreateDB : Migration
             column: "MessageId");
 
         migrationBuilder.CreateIndex(
+            name: "IX_MessageStatuses_MessageReactionId",
+            table: "MessageStatuses",
+            column: "MessageReactionId");
+
+        migrationBuilder.CreateIndex(
             name: "IX_StatusError_StatusId",
             table: "StatusError",
             column: "StatusId",
@@ -230,9 +249,6 @@ public partial class CreateDB : Migration
             name: "Contacts");
 
         migrationBuilder.DropTable(
-            name: "MessageReaction");
-
-        migrationBuilder.DropTable(
             name: "MessageReader");
 
         migrationBuilder.DropTable(
@@ -240,6 +256,9 @@ public partial class CreateDB : Migration
 
         migrationBuilder.DropTable(
             name: "MessageStatuses");
+
+        migrationBuilder.DropTable(
+            name: "MessageReaction");
 
         migrationBuilder.DropTable(
             name: "Messages");

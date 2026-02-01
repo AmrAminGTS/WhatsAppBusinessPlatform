@@ -8,7 +8,7 @@ namespace WhatsAppBusinessPlatform.Application.DTOs.Messaging.MessageContentType
 public sealed class ReactionMessageContent: IMessageContentType
 {
     [JsonPropertyName("message_id")]
-    public required string MessageId { get; set; }
+    public required string ReactedToMessageId { get; set; }
 
     [JsonPropertyName("emoji")]
     public string? Emoji { get; set; }
