@@ -66,11 +66,6 @@ internal sealed class IdempotencyHandler : IIdempotencyHandler, IDisposable
             // Set Cache on success
             if (result.IsSuccess)
             {
-                if (!_logger.IsEnabled(LogLevel.Debug))
-                {
-                    _logger.LogInformation("Debug level is currently DISABLED for this logger.");
-                }
-
                 _memoryCache.Set(idempotencyKey, result, TimeSpan.FromMinutes(timeToLiveInMinutes));
                 _logger.LogDebug("Cached idempotent result for key {Key} for {Minutes} minutes", idempotencyKey, timeToLiveInMinutes);
             }

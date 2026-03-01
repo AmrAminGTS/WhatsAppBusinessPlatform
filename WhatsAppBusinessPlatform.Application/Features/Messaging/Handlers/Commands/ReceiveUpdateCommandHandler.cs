@@ -204,7 +204,7 @@ internal sealed class ReceiveUpdateCommandHandler : ICommandHandler<ReceiveUpdat
         else
         {
             messageRepository.Add(messageEntry);
-            messageEntry.Raise(new MessageReceivedDomainEvent(messageEntry));
+            messageEntry.Raise(new MessageReceivedDomainEvent(messageEntry.Id));
             _logger.LogInformation("Received Update is Message");
         }
         return await _unitOfWork.SaveAsync(cancellationToken);

@@ -1,4 +1,6 @@
-﻿namespace WhatsAppBusinessPlatform.Domain.Common;
+﻿using System.Net.Http;
+
+namespace WhatsAppBusinessPlatform.Domain.Common;
 public record DomainError
 {
     public static readonly DomainError None = new(string.Empty, ErrorType.None);
@@ -28,3 +30,4 @@ public record DomainError
     public static DomainError Unauthorized(string code, params object[] args) =>
         new(code, ErrorType.Unauthorized, args);
 }
+

@@ -3,6 +3,7 @@ using System.Net.ServerSentEvents;
 using Microsoft.AspNetCore.Mvc;
 
 using WhatsAppBusinessPlatform.Application.Abstractions.Realtime;
+using WhatsAppBusinessPlatform.API.Web.RealTime;
 
 namespace WhatsAppBusinessPlatform.API.Web.Extensions;
 internal static class ApplicationBuilderExtensions
@@ -45,4 +46,7 @@ internal static class ApplicationBuilderExtensions
         }
 #pragma warning restore S2190 // Loops and recursions should not be infinite
     }
+
+    public static void MapSignalRHubs(this IEndpointRouteBuilder app) 
+        => app.MapHub<MessagingHub>("RealTimeHubs/Messaging");
 }

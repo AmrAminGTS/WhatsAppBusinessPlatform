@@ -1,5 +1,6 @@
-﻿using System.Reflection;
-using WhatsAppBusinessPlatform.API.Web.Infrastructure;
+﻿using WhatsAppBusinessPlatform.API.Web.Infrastructure;
+using WhatsAppBusinessPlatform.API.Web.RealTime;
+using WhatsAppBusinessPlatform.Application.Abstractions.Realtime;
 
 namespace WhatsAppBusinessPlatform.API.Web;
 internal static class DependencyInjection
@@ -12,15 +13,19 @@ internal static class DependencyInjection
             services.AddSwaggerGen();
 
             services.AddControllers();
+            services.AddSignalR();
 
             //Configure CORS policy
             services.AddCors(options => 
-                options.AddPolicy("AllowAllOrigins", builder => 
+                options.AddPolicy("RealTimePolicy", builder => 
                     builder
-                    .AllowAnyOrigin()
+                    .WithOrigins("https://whatsappui.majedsoft.net", "https://localhost:7260", "http://localhost:4200")
                     .AllowAnyMethod()
-                    .AllowAnyHeader()));
+                    .AllowAnyHeader()
+                    .AllowCredentials())
+                );
 
+            services.AddScoped<IRealTimeMessagingChannel, RealTimeMessagingChannel>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails(options => options.CustomizeProblemDetails = (context) =>
                 {

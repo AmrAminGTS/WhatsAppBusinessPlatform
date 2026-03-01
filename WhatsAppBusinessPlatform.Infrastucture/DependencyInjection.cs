@@ -39,7 +39,6 @@ public static class DependencyInjection
         }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
 
         services.AddSingleton<IServerEventChannel, ServerEventChannel>();
-
         services.AddScoped<IIdempotencyHandler, IdempotencyHandler>();
 
         return services;

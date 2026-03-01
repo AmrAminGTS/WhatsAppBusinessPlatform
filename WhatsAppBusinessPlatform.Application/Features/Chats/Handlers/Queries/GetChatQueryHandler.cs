@@ -15,6 +15,7 @@ internal sealed class GetChatQueryHandler(IUnitOfWork unitOfWork) : IQueryHandle
     {
         IListWithPaginationInfo<ChatMessageResponse> messages = await unitOfWork.Repository<WAMessage>()
             .Include(m => m.Reactions)
+            .Include(m => m.ReplyTo)
             .Where(m => m.ContactPhoneNumber == request.PhoneNumberId 
                 && m.ContentType != MessageContentType.Reaction)
             .AsNoTracking()

@@ -56,3 +56,11 @@ public sealed record MessageReactionResponse(
 public sealed record SentReaction(
     string Emoji,
     string Id);
+
+public sealed class MessageReactionsChangedResponse
+{
+    public required string ContactPhone { get; set; }
+    public required string MessageId { get; set; }
+    public IDictionary<string, int> ReactionSummary { get; set; } = new Dictionary<string, int>();
+    public ChatLastUpdateResponse? LastChatUpdate { get; set; }
+}

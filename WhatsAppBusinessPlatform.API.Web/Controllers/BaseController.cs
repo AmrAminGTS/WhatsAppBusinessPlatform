@@ -6,9 +6,6 @@ using WhatsAppBusinessPlatform.Domain.Common;
 
 namespace WhatsAppBusinessPlatform.API.Web.Controllers;
 
-#if !DEBUG
-[Authorize]
-#endif
 [Route("[controller]")]
 [ApiController]
 public class BaseController : ControllerBase
@@ -86,6 +83,5 @@ public class BaseController : ControllerBase
             }
             return validationError.Errors.ToList();
         }
- 
-}
+    }
 }

@@ -52,11 +52,11 @@ app.UseHttpsRedirection();
 // 3. Static files (served without auth unless you specifically protect them)
 app.UseStaticFiles();
 
-// 4. Routing must run before auth/cors when using endpoint routing
+// 4. Routing must run before auth/CORS when using endpoint routing
 app.UseRouting();
 
 // 5. CORS for endpoint routing: between UseRouting and UseAuthorization/MapControllers
-app.UseCors("AllowAllOrigins");
+app.UseCors("RealTimePolicy");
 
 // 6. Authentication & Authorization (auth before endpoints)
 app.UseAuthentication();
@@ -65,5 +65,6 @@ app.UseAuthorization();
 // 7. Map endpoints (controllers, minimal APIs)
 app.MapControllers();
 app.MapServerSentEventEndpoints();
+app.MapSignalRHubs();
 
 await app.RunAsync();

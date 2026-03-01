@@ -307,3 +307,6 @@ dotnet_diagnostic.S2094.severity = none
 
 # S3398: "private" methods called only by inner classes should be moved to those classes
 dotnet_diagnostic.S3398.severity = none
+
+# CA1873: Avoid potentially expensive logging
+dotnet_diagnostic.CA1873.severity = none
