@@ -19,7 +19,11 @@ internal static class DependencyInjection
             services.AddCors(options => 
                 options.AddPolicy("RealTimePolicy", builder => 
                     builder
-                    .WithOrigins("https://whatsappui.majedsoft.net", "https://localhost:7260", "http://localhost:4200")
+                    .WithOrigins(
+                        "https://whatsappui.majedsoft.net", 
+                        "https://whatsapp.majedsoft.com", 
+                        "https://localhost:7260", 
+                        "http://localhost:4200")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials())

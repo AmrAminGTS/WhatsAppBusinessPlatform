@@ -40,7 +40,7 @@ public sealed class WebhookController : BaseController
 
     // POST /whatsapp
     [HttpPost("whatsapp")]
-    public async Task<ActionResult> ReceiveUpdatess(CancellationToken cancellationToken = default)
+    public async Task<ActionResult> ReceiveUpdates(CancellationToken cancellationToken = default)
     {
         Request.EnableBuffering();
         Result result = await _sender.Send(new ReceiveUpdateCommand(Request), cancellationToken);
